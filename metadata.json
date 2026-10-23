@@ -1,0 +1,6 @@
+{
+  "name": "Sistem Monitoring Kinerja Multi-WAN Real-Time",
+  "description": "Sistem monitoring kinerja Multi-WAN real-time berbasis integrasi Router API (MikroTik RouterOS REST API) untuk pengujian throughput, latensi, jitter, packet loss, dan failover otomatis berstandar TIPHON.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
