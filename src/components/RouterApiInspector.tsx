@@ -344,9 +344,9 @@ export const RouterApiInspector: React.FC<RouterApiInspectorProps> = ({
 
               <div className="pt-2">
                 <div className="bg-slate-950/80 p-2.5 rounded border border-slate-800 text-[11px] text-slate-400 space-y-1">
-                  <div className="text-cyan-400 font-semibold">Catatan Pengujian Skripsi:</div>
+                  <div className="text-cyan-400 font-semibold">Catatan Pengujian & Emulator NOC:</div>
                   <p>
-                    Aplikasi menyertakan mesin emulator MikroTik RouterOS v7 lengkap. Jika tidak terhubung ke router fisik di jaringan lokal, emulator menyediakan telemetri deterministik untuk presentasi skripsi.
+                    Aplikasi menyertakan mesin emulator MikroTik RouterOS v7 lengkap. Jika tidak terhubung ke router fisik di jaringan lokal, emulator menyediakan telemetri deterministik untuk pengujian operasional NOC.
                   </p>
                 </div>
               </div>

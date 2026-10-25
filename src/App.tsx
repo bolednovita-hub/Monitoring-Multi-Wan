@@ -187,7 +187,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Thesis Topic Kicker Banner */}
+        {/* NOC Performance Kicker Banner */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
@@ -314,6 +314,11 @@ export default function App() {
               onToggleLink={handleToggleLink}
               linksysDevice={activeLinksys}
               crossLayerSync={crossLayerSync}
+              onToggleLocalMasterNtp={() => networkEngine.toggleLocalMasterNtp()}
+              topologyMode={networkEngine.getTopologyMode()}
+              onSelectTopologyMode={(mode) => networkEngine.setTopologyMode(mode)}
+              vrrpMaster={networkEngine.getVrrpMasterRouter()}
+              onToggleVrrpMaster={() => networkEngine.toggleVrrpMaster()}
             />
             <EventLogSection events={events} />
           </div>
@@ -325,6 +330,9 @@ export default function App() {
             <PccConnectionTracker
               connections={pccConnections}
               wans={wans}
+              onSimulateNewSession={(params) => networkEngine.simulateNewPccConnection(params)}
+              onTerminateConnection={(id) => networkEngine.terminatePccConnection(id)}
+              onResetConnections={() => networkEngine.resetPccConnections()}
             />
           </div>
         )}
@@ -335,6 +343,7 @@ export default function App() {
             <RouterCliTerminal
               onExecuteCommand={(cmd) => networkEngine.executeCliCommand(cmd)}
               netwatchTargets={netwatchTargets}
+              onPingTarget={(targetId) => networkEngine.pingNetwatchTarget(targetId)}
             />
           </div>
         )}

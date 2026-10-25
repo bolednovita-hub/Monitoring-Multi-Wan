@@ -4,6 +4,7 @@ import {
   FailoverBenchmarkResult,
   LinkStatus,
   LinksysDevice,
+  LinksysTopologyMode,
   LoadBalancingConfig,
   LoadBalancingMode,
   NetwatchTarget,
@@ -19,6 +20,7 @@ import {
   TelegramAlertConfig,
   TelemetryPoint,
   TiphonCategory,
+  TopologyArchitectureConfig,
   TrafficCategoryStat,
   UbusCallResult,
   WanId,
@@ -447,7 +449,7 @@ const INITIAL_LINKSYS_DEVICES: LinksysDevice[] = [
           bssid: '60:38:E0:B2:7C:14',
           connectedClients: [
             {
-              hostname: 'ThinkPad-T14-Skripsi',
+              hostname: 'ThinkPad-T14-Admin',
               ip: '192.168.1.102',
               mac: '48:2A:E3:77:88:C1',
               signalDbm: -42,
@@ -476,7 +478,7 @@ const INITIAL_LINKSYS_DEVICES: LinksysDevice[] = [
     i2cBus: 'i2c-0 (Armada 385 I2C bus)',
     lanIp: '192.168.1.3',
     macAddress: '60:38:E0:C3:9D:33',
-    location: 'Ruang Riset Skripsi Mahasiswa',
+    location: 'Ruang NOC & Riset Jaringan',
     status: 'online',
     powerState: 'on',
     remoteSshPort: 22,
@@ -761,9 +763,11 @@ export class NetworkEngine {
   private apiLogs: RouterApiLog[] = [];
   private pccConnections: PccConnection[] = JSON.parse(JSON.stringify(INITIAL_PCC_CONNECTIONS));
   private netwatchTargets: NetwatchTarget[] = JSON.parse(JSON.stringify(INITIAL_NETWATCH_TARGETS));
+  private topologyMode: LinksysTopologyMode = 'downstream_sublayer';
+  private vrrpMasterRouter: 'mikrotik' | 'linksys' = 'mikrotik';
   private telegramAlertConfig: TelegramAlertConfig = {
     enabled: true,
-    botToken: '6821949182:AAH9fkl9x12Jp94-Kqm91Z_skripsi',
+    botToken: '6821949182:AAH9fkl9x12Jp94-Kqm91Z_noc',
     chatId: '-1002948192841',
     soundEnabled: true,
     sentCount: 3,
@@ -1386,7 +1390,7 @@ export class NetworkEngine {
         type: 'latency_spike',
         interfaceId: wanId,
         title: `Simulasi Latensi Tinggi (+${latencyOffsetMs}ms) di ${wanId}`,
-        description: `Terdeteksi jitter dan RTT tinggi pada gerbang WAN. Pengujian SLA skripsi mencatat penurunan responsivitas.`,
+        description: `Terdeteksi jitter dan RTT tinggi pada gerbang WAN. Pengujian SLA operasional mencatat penurunan responsivitas.`,
         severity: 'warning'
       });
     }
@@ -2386,8 +2390,8 @@ export class NetworkEngine {
     this.failoverBenchmarks.unshift(result);
     this.addEvent({
       type: 'failover',
-      title: `[Benchmark Skripsi] Uji Failover Selesai: ${wan.name.split(' - ')[0]}`,
-      description: `Waktu Reaksi: ${totalSwitchTimeMs} ms (Deteksi: ${detectionDelayMs} ms, Konvergensi: ${convergenceTimeMs} ms, Packet Drop: ${packetLossPct}%). Disimpan ke tabel pengujian skripsi.`,
+      title: `[Audit NOC] Uji Failover Selesai: ${wan.name.split(' - ')[0]}`,
+      description: `Waktu Reaksi: ${totalSwitchTimeMs} ms (Deteksi: ${detectionDelayMs} ms, Konvergensi: ${convergenceTimeMs} ms, Packet Drop: ${packetLossPct}%). Disimpan ke repositori telemetri audit NOC.`,
       severity: result.status === 'passed' ? 'success' : 'warning'
     });
     this.notify();
@@ -2420,7 +2424,7 @@ export class NetworkEngine {
     return this.wifiScans[band];
   }
 
-  // Raw Telemetry Exporters for Thesis
+  // Raw Telemetry Exporters for NOC Audit
   public exportTelemetryCsv(): string {
     const active = this.getActiveLinksys();
     const headers = [
@@ -2492,7 +2496,7 @@ export class NetworkEngine {
     const payload = {
       metadata: {
         exportDate: new Date().toISOString(),
-        thesisTitle: 'INTEGRASI API ROUTER UNTUK SISTEM MONITORING KINERJA MULTI-WAN BERBASIS WEB REAL TIME',
+        projectTitle: 'INTEGRASI API ROUTER UNTUK SISTEM MONITORING KINERJA MULTI-WAN BERBASIS WEB REAL TIME',
         coreRouter: this.router.model,
         edgeRouter: active.model,
         hardwareRtc: active.rtc.chipModel,
@@ -2549,6 +2553,163 @@ export class NetworkEngine {
 
   public getPccConnections(): PccConnection[] {
     return JSON.parse(JSON.stringify(this.pccConnections));
+  }
+
+  public simulateNewPccConnection(params?: Partial<PccConnection>): PccConnection {
+    const id = `conn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const protocols: ('TCP' | 'UDP')[] = ['TCP', 'UDP'];
+    const protocol = params?.protocol || (Math.random() > 0.3 ? 'TCP' : 'UDP');
+    const services = [
+      { name: 'YouTube 4K UltraHD', port: 443, ip: '142.250.190.46', rx: 14200, tx: 320 },
+      { name: 'Google Meet VoIP HD', port: 443, ip: '172.217.16.206', rx: 3200, tx: 2800 },
+      { name: 'Zoom Conference Video', port: 8801, ip: '69.174.57.100', rx: 4100, tx: 3600 },
+      { name: 'SIAKAD Web Portal (HTTPS)', port: 443, ip: '103.111.201.25', rx: 1850, tx: 410 },
+      { name: 'Valorant Riot Game Server', port: 7000, ip: '162.249.72.1', rx: 450, tx: 420 },
+      { name: 'Steam CDN Game Download', port: 80, ip: '23.48.200.12', rx: 28500, tx: 650 },
+      { name: 'SSH Remote Shell NOC', port: 22, ip: '185.199.108.153', rx: 120, tx: 110 }
+    ];
+    const defaultSvc = services[Math.floor(Math.random() * services.length)];
+    const serviceName = params?.serviceName || defaultSvc.name;
+    const dstPort = params?.dstPort || defaultSvc.port;
+    const dstIp = params?.dstIp || defaultSvc.ip;
+    const srcPort = params?.srcPort || Math.floor(40000 + Math.random() * 25000);
+    const clientIps = ['192.168.1.102', '192.168.1.105', '192.168.1.110', '192.168.1.115', '192.168.1.120'];
+    const srcIp = params?.srcIp || clientIps[Math.floor(Math.random() * clientIps.length)];
+
+    // Evaluate PCC hash slot based on active WAN status
+    const wan1 = this.wans[0];
+    const wan2 = this.wans[1];
+    const wan3 = this.wans[2];
+
+    let outInterface: WanId = 'ether1-wan1';
+    let pccHashSlot = '3/0';
+    let routingMark = 'to_WAN1';
+    let connectionMark = 'conn_wan1';
+
+    const randSlot = Math.floor(Math.random() * 3);
+    if (randSlot === 0 || randSlot === 1) {
+      if (wan1.status === 'active') {
+        outInterface = 'ether1-wan1';
+        pccHashSlot = randSlot === 0 ? '3/0' : '3/1';
+        routingMark = 'to_WAN1';
+        connectionMark = 'conn_wan1';
+      } else if (wan2.status === 'active') {
+        outInterface = 'ether2-wan2';
+        pccHashSlot = '3/1';
+        routingMark = 'to_WAN2';
+        connectionMark = 'conn_wan2';
+      } else {
+        outInterface = 'ether3-wan3';
+        pccHashSlot = '3/2';
+        routingMark = 'to_WAN3_Backup';
+        connectionMark = 'conn_wan3';
+      }
+    } else {
+      if (wan2.status === 'active') {
+        outInterface = 'ether2-wan2';
+        pccHashSlot = '3/1';
+        routingMark = 'to_WAN2';
+        connectionMark = 'conn_wan2';
+      } else if (wan1.status === 'active') {
+        outInterface = 'ether1-wan1';
+        pccHashSlot = '3/0';
+        routingMark = 'to_WAN1';
+        connectionMark = 'conn_wan1';
+      } else {
+        outInterface = 'ether3-wan3';
+        pccHashSlot = '3/2';
+        routingMark = 'to_WAN3_Backup';
+        connectionMark = 'conn_wan3';
+      }
+    }
+
+    const newConn: PccConnection = {
+      id,
+      protocol,
+      srcIp,
+      srcPort,
+      dstIp,
+      dstPort,
+      serviceName,
+      pccHashSlot: params?.pccHashSlot || pccHashSlot,
+      routingMark: params?.routingMark || routingMark,
+      connectionMark: params?.connectionMark || connectionMark,
+      outInterface: (params?.outInterface as WanId) || outInterface,
+      rxRateKbps: params?.rxRateKbps || defaultSvc.rx,
+      txRateKbps: params?.txRateKbps || defaultSvc.tx,
+      bytesTransferred: params?.bytesTransferred || Math.floor(102400 + Math.random() * 5000000),
+      timeoutSec: params?.timeoutSec || (protocol === 'TCP' ? 86400 : 180),
+      durationSec: params?.durationSec || 12,
+      tcpState: protocol === 'TCP' ? 'ESTABLISHED' : 'UDP_STREAM'
+    };
+
+    this.pccConnections.unshift(newConn);
+    this.addEvent({
+      type: 'load_balance',
+      interfaceId: newConn.outInterface,
+      title: `[PCC Conntrack] Sesi Baru Terpetakan: ${newConn.serviceName}`,
+      description: `Aliran soket ${newConn.srcIp}:${newConn.srcPort} -> ${newConn.dstIp}:${newConn.dstPort} (${newConn.protocol}) dipetakan ke slot hash ${newConn.pccHashSlot} -> antarmuka ${newConn.outInterface}.`,
+      severity: 'info'
+    });
+    this.notify();
+    return newConn;
+  }
+
+  public terminatePccConnection(id: string): boolean {
+    const idx = this.pccConnections.findIndex(c => c.id === id);
+    if (idx === -1) return false;
+    const removed = this.pccConnections[idx];
+    this.pccConnections.splice(idx, 1);
+    this.addEvent({
+      type: 'load_balance',
+      interfaceId: removed.outInterface,
+      title: `[PCC Conntrack] Sesi Diputus Manual: ${removed.serviceName}`,
+      description: `Koneksi ${removed.srcIp}:${removed.srcPort} -> ${removed.dstIp}:${removed.dstPort} telah dihapus dari tabel soket /ip/firewall/connection.`,
+      severity: 'warning'
+    });
+    this.notify();
+    return true;
+  }
+
+  public resetPccConnections(): void {
+    this.pccConnections = JSON.parse(JSON.stringify(INITIAL_PCC_CONNECTIONS));
+    this.notify();
+  }
+
+  public pingNetwatchTarget(targetId: string): string {
+    const target = this.netwatchTargets.find(t => t.id === targetId || t.host === targetId);
+    if (!target) return 'ERROR: Target netwatch tidak ditemukan.';
+
+    const isWanDown =
+      (target.id === 'nw-1' && this.wans[0].status === 'down') ||
+      (target.id === 'nw-2' && this.wans[1].status === 'down') ||
+      (target.id === 'nw-3' && this.wans[2].status === 'down');
+
+    if (isWanDown) {
+      target.status = 'down';
+      target.lastRttMs = 0;
+      target.packetLossPct = 100;
+      this.notify();
+      return `  SEQ HOST                                     SIZE TTL TIME  STATUS
+    0 ${target.host.padEnd(40)} --  --    --  timeout
+    1 ${target.host.padEnd(40)} --  --    --  timeout
+    2 ${target.host.padEnd(40)} --  --    --  timeout
+    3 ${target.host.padEnd(40)} --  --    --  timeout
+    sent=4 received=0 packet-loss=100% (Link Interface Down)`;
+    }
+
+    const rtt = Math.floor(8 + Math.random() * 12);
+    target.status = 'up';
+    target.lastRttMs = rtt;
+    target.packetLossPct = 0;
+    this.notify();
+
+    return `  SEQ HOST                                     SIZE TTL TIME  STATUS
+    0 ${target.host.padEnd(40)} 56  64 ${rtt}ms
+    1 ${target.host.padEnd(40)} 56  64 ${rtt + 1}ms
+    2 ${target.host.padEnd(40)} 56  64 ${rtt - 1}ms
+    3 ${target.host.padEnd(40)} 56  64 ${rtt}ms
+    sent=4 received=4 packet-loss=0% min-rtt=${rtt - 1}ms avg-rtt=${rtt}ms max-rtt=${rtt + 1}ms`;
   }
 
   public getNetwatchTargets(): NetwatchTarget[] {
@@ -2845,6 +3006,110 @@ ${lines.join('\n')}`;
     }
 
     return `bad command name ${cmd} (line 1 column 1)`;
+  }
+
+  // Topology Architecture Management (Downstream vs Parallel VRRP vs Edge Offload)
+  public getTopologyMode(): LinksysTopologyMode {
+    return this.topologyMode;
+  }
+
+  public setTopologyMode(mode: LinksysTopologyMode): void {
+    this.topologyMode = mode;
+    this.addEvent({
+      type: 'load_balance',
+      title: `[Arsitektur Topologi Diubah] Mode: ${mode === 'downstream_sublayer' ? 'Bertingkat (Downstream Sub-Layer)' : mode === 'parallel_vrrp' ? 'Sejajar (VRRP High-Availability)' : 'Edge Dedicated Offload'}`,
+      description: mode === 'downstream_sublayer'
+        ? 'Arsitektur Hierarki Bertingkat aktif: Klien -> Linksys OpenWrt (Sub-layer AP & Master RTC DS3231) -> Trunk Gigabit -> Core MikroTik CCR2004 (PCC 3 WAN).'
+        : mode === 'parallel_vrrp'
+        ? 'Arsitektur Sejajar (VRRP High-Availability RFC 5798) aktif: Virtual IP Gateway 192.168.1.254 dibagi antara MikroTik CCR2004 (Master WAN1&2) dan Linksys OpenWrt (Backup WAN3 Orbit).'
+        : 'Arsitektur Edge Offload aktif: Linksys menangani langsung WAN3 Orbit 4G LTE sebagai gerbang OOBM cadangan terisolasi.',
+      severity: 'info'
+    });
+    this.notify();
+  }
+
+  public getVrrpMasterRouter(): 'mikrotik' | 'linksys' {
+    return this.vrrpMasterRouter;
+  }
+
+  public toggleVrrpMaster(): void {
+    this.vrrpMasterRouter = this.vrrpMasterRouter === 'mikrotik' ? 'linksys' : 'mikrotik';
+    const activeName = this.vrrpMasterRouter === 'mikrotik' ? 'MikroTik CCR2004 Core' : 'Linksys OpenWrt Edge';
+    const activePriority = this.vrrpMasterRouter === 'mikrotik' ? 255 : 100;
+    this.addEvent({
+      type: 'failover',
+      title: `[VRRP HA Switchover] Gateway 192.168.1.254 Dialihkan ke ${activeName}`,
+      description: `Protokol VRRP (RFC 5798) memindahkan peran MASTER ke ${activeName} (Priority: ${activePriority}). Lalu lintas klien dialihkan tanpa merubah konfigurasi IP perangkat klien.`,
+      severity: 'warning'
+    });
+    this.notify();
+  }
+
+  public getTopologyArchitectureConfigs(): TopologyArchitectureConfig[] {
+    return [
+      {
+        mode: 'downstream_sublayer',
+        title: 'Model A: Arsitektur Hierarki Bertingkat (Downstream Access Gateway)',
+        badge: 'Standar Kampus / Enterprise (Rekomendasi Utama)',
+        sublabel: 'Linksys berada DI BAWAH MikroTik sebagai Access Layer AP & Stratum 1 Hardware RTC Time Feed',
+        mikrotikRole: 'Core Gateway & RouterOS v7 PCC Multi-WAN (Semua WAN 1, 2, 3 terpusat di CCR2004)',
+        linksysRole: 'Sub-Layer Access Gateway (Wi-Fi 6 MIMO AP, DHCP Klien Lab, Hardware RTC Master DS3231)',
+        wanDistribution: 'WAN1 (IndiHome) + WAN2 (Biznet) + WAN3 (Orbit 4G) diatur utuh oleh MikroTik',
+        timeSyncPath: 'Hardware RTC DS3231 Linksys -> NTP Broadcast UDP 123 -> MikroTik RouterOS Client',
+        pros: [
+          'Pemisahan peran bersih (Separation of Concerns): MikroTik fokus routing, Linksys fokus akses klien',
+          'PCC Load Balancing 3 ISP terkelola secara sentral dan optimal dalam 1 routing table',
+          'Hemat alamat IP publik dan efisiensi manajemen firewall mangle'
+        ],
+        cons: [
+          'MikroTik menjadi Single Point of Failure (SPOF); jika CCR2004 mati, akses internet klien terputus',
+          'Throughput seluruh klien dibatasi oleh kapasitas link trunk antara Linksys dan MikroTik'
+        ],
+        industryStandard: 'Cisco Three-Tier Architecture (Access -> Distribution/Core -> Edge WAN)'
+      },
+      {
+        mode: 'parallel_vrrp',
+        title: 'Model B: Arsitektur Sejajar (VRRP High-Availability Dual Gateway)',
+        badge: 'Standar ISP NOC / Mission Critical (Zero Downtime)',
+        sublabel: 'Linksys berada SEJAJAR dengan MikroTik berbagi Virtual Gateway IP 192.168.1.254 (RFC 5798)',
+        vrrpVirtualIp: '192.168.1.254/24',
+        vrrpVirtualMac: '00:00:5E:00:01:0A',
+        mikrotikRole: 'VRRP Master (Priority 255) — Mengelola WAN 1 Fiber & WAN 2 Dedicated',
+        linksysRole: 'VRRP Backup (Priority 100) — Mengelola Langsung WAN 3 Orbit LTE & Hardware RTC',
+        wanDistribution: 'MikroTik tangani WAN 1 & WAN 2; Linksys tangani langsung WAN 3 Orbit 4G LTE',
+        timeSyncPath: 'Linksys RTC sinkron lokal dan menyiarkan NTP Multicast ke MikroTik via LAN',
+        pros: [
+          'Toleransi kegagalan perangkat total (No Single Point of Failure); jika MikroTik mati/reboot, Linksys langsung take over dalam <1 detik',
+          'WAN 3 Orbit 4G independen secara fisik, tetap hidup bahkan jika listrik rak MikroTik padam',
+          'Klien tidak perlu mengubah default gateway karena menggunakan Virtual IP bersama'
+        ],
+        cons: [
+          'Memerlukan konfigurasi protokol VRRP di kedua perangkat (RouterOS & OpenWrt keepalived)',
+          'Algoritma PCC terpecah (MikroTik PCC WAN1 & WAN2, Linksys menangani WAN3 saat failover)'
+        ],
+        industryStandard: 'IETF RFC 5798 (Virtual Router Redundancy Protocol - VRRPv3)'
+      },
+      {
+        mode: 'edge_offload',
+        title: 'Model C: Arsitektur Dedicated Offload / Out-of-Band Management (OOBM)',
+        badge: 'Standar Manajemen Data Center & ISP Edge',
+        sublabel: 'Linksys sebagai Router Khusus WAN 3 Orbit LTE & Monitoring OOBM Terisolasi',
+        mikrotikRole: 'Main Production Gateway (Trafik Produksi WAN 1 IndiHome & WAN 2 Biznet)',
+        linksysRole: 'Dedicated Management & Out-of-Band (OOBM) Gateway via WAN 3 Orbit LTE',
+        wanDistribution: 'Trafik user lewat MikroTik (WAN 1 & 2); Trafik telemetri, API & remote via Linksys (WAN 3)',
+        timeSyncPath: 'Linksys sebagai Dedicated Time Server OOBM mandiri',
+        pros: [
+          'Akses remote ke router MikroTik selalu aman melalui jaringan OOBM seluler terpisah',
+          'Trafik telemetri monitoring tidak membebani utilisasi bandwidth produksi',
+          'Pemisahan security zone yang sangat ketat (Management plane vs Data plane)'
+        ],
+        cons: [
+          'Klien biasa tidak dapat memakai WAN 3 kecuali rute policy dialihkan manual',
+          'Biaya paket data seluler khusus untuk jalur manajemen'
+        ],
+        industryStandard: 'NIST SP 800-160 / ISO 27001 Out-of-Band Network Architecture'
+      }
+    ];
   }
 }
 

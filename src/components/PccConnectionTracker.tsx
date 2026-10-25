@@ -12,23 +12,97 @@ import {
   Radio,
   Cpu,
   Zap,
-  ShieldAlert
+  ShieldAlert,
+  PlusCircle,
+  Trash2,
+  Download,
+  X
 } from 'lucide-react';
 import { PccConnection, WanInterface, WanId } from '../types/network';
 
 interface PccConnectionTrackerProps {
   connections: PccConnection[];
   wans: WanInterface[];
-  onSimulateNewSession?: () => void;
+  onSimulateNewSession?: (params?: Partial<PccConnection>) => void;
+  onTerminateConnection?: (id: string) => void;
+  onResetConnections?: () => void;
 }
 
 export const PccConnectionTracker: React.FC<PccConnectionTrackerProps> = ({
   connections,
-  wans
+  wans,
+  onSimulateNewSession,
+  onTerminateConnection,
+  onResetConnections
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedWan, setSelectedWan] = useState<string>('all');
   const [selectedProtocol, setSelectedProtocol] = useState<string>('all');
+  const [showSimulateModal, setShowSimulateModal] = useState(false);
+  const [simService, setSimService] = useState('YouTube 4K UltraHD');
+  const [simProtocol, setSimProtocol] = useState<'TCP' | 'UDP'>('TCP');
+  const [simBandwidth, setSimBandwidth] = useState('15');
+
+  const PRESET_SERVICES = [
+    { name: 'YouTube 4K UltraHD', protocol: 'TCP' as const, port: 443, ip: '142.250.190.46', rx: 14200, tx: 320 },
+    { name: 'Google Meet VoIP HD', protocol: 'UDP' as const, port: 443, ip: '172.217.16.206', rx: 3200, tx: 2800 },
+    { name: 'Zoom Conference Video', protocol: 'UDP' as const, port: 8801, ip: '69.174.57.100', rx: 4100, tx: 3600 },
+    { name: 'SIAKAD Web Portal (HTTPS)', protocol: 'TCP' as const, port: 443, ip: '103.111.201.25', rx: 1850, tx: 410 },
+    { name: 'Valorant Riot Game Server', protocol: 'UDP' as const, port: 7000, ip: '162.249.72.1', rx: 450, tx: 420 },
+    { name: 'Steam CDN Game Download', protocol: 'TCP' as const, port: 80, ip: '23.48.200.12', rx: 28500, tx: 650 }
+  ];
+
+  const handleCreateSession = () => {
+    const selectedPreset = PRESET_SERVICES.find(p => p.name === simService) || PRESET_SERVICES[0];
+    const rxKbps = Number(simBandwidth) * 1024 || selectedPreset.rx;
+    if (onSimulateNewSession) {
+      onSimulateNewSession({
+        serviceName: simService,
+        protocol: simProtocol,
+        dstPort: selectedPreset.port,
+        dstIp: selectedPreset.ip,
+        rxRateKbps: rxKbps,
+        txRateKbps: selectedPreset.tx
+      });
+    }
+    setShowSimulateModal(false);
+  };
+
+  const handleExportCsv = () => {
+    const headers = ['id', 'protocol', 'src_ip', 'src_port', 'dst_ip', 'dst_port', 'service_name', 'pcc_hash_slot', 'routing_mark', 'out_interface', 'rx_kbps', 'tx_kbps', 'state'].join(',');
+    const rows = connections.map(c => [
+      c.id,
+      c.protocol,
+      c.srcIp,
+      c.srcPort,
+      c.dstIp,
+      c.dstPort,
+      `"${c.serviceName}"`,
+      c.pccHashSlot,
+      c.routingMark,
+      c.outInterface,
+      c.rxRateKbps,
+      c.txRateKbps,
+      c.tcpState
+    ].join(','));
+    const blob = new Blob([[headers, ...rows].join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pcc-conntrack-sessions-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportJson = () => {
+    const blob = new Blob([JSON.stringify(connections, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pcc-conntrack-sessions-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const filteredConnections = connections.filter(conn => {
     const matchesSearch =
@@ -70,12 +144,133 @@ export const PccConnectionTracker: React.FC<PccConnectionTrackerProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={() => setShowSimulateModal(true)}
+              className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Simulasikan Sesi Baru</span>
+            </button>
+            <button
+              onClick={handleExportCsv}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+              title="Ekspor CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-cyan-400" />
+              <span>CSV</span>
+            </button>
+            <button
+              onClick={handleExportJson}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+              title="Ekspor JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>JSON</span>
+            </button>
+            {onResetConnections && (
+              <button
+                onClick={onResetConnections}
+                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+                title="Reset Sesi Default"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+            )}
             <span className="text-xs font-mono px-2.5 py-1 rounded bg-slate-950 text-slate-300 border border-slate-800">
               Total Sesi Aktif: <strong className="text-cyan-400">{connections.length}</strong>
             </span>
           </div>
         </div>
+
+        {/* Modal Simulate Connection */}
+        {showSimulateModal && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-cyan-500/40 rounded-xl p-5 max-w-md w-full shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="p-1 rounded bg-cyan-500/10 text-cyan-400">
+                    <PlusCircle className="w-4 h-4" />
+                  </span>
+                  <h3 className="text-sm font-bold text-white">Injeksi Sesi Koneksi PCC Baru</h3>
+                </div>
+                <button
+                  onClick={() => setShowSimulateModal(false)}
+                  className="p-1 rounded text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block text-slate-300 mb-1 font-semibold">Pilih Layanan Target:</label>
+                  <select
+                    value={simService}
+                    onChange={(e) => {
+                      setSimService(e.target.value);
+                      const p = PRESET_SERVICES.find(s => s.name === e.target.value);
+                      if (p) setSimProtocol(p.protocol);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-400 focus:outline-none"
+                  >
+                    {PRESET_SERVICES.map(p => (
+                      <option key={p.name} value={p.name}>{p.name} ({p.protocol})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-300 mb-1 font-semibold">Protokol Jaringan:</label>
+                    <select
+                      value={simProtocol}
+                      onChange={(e) => setSimProtocol(e.target.value as 'TCP' | 'UDP')}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-400 focus:outline-none"
+                    >
+                      <option value="TCP">TCP</option>
+                      <option value="UDP">UDP</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-slate-300 mb-1 font-semibold">Laju Trafik (MB/s):</label>
+                    <input
+                      type="number"
+                      value={simBandwidth}
+                      onChange={(e) => setSimBandwidth(e.target.value)}
+                      min="1"
+                      max="100"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                  <div className="text-cyan-300 font-semibold">Mekanisme Hashing RouterOS:</div>
+                  <p>
+                    Koneksi baru akan dilewatkan ke rantai <code className="text-white font-mono">prerouting</code> MikroTik CCR2004 dan di-hash berdasarkan kombinasi IP:Port sumber dan tujuan secara deterministik.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  onClick={() => setShowSimulateModal(false)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleCreateSession}
+                  className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Injeksi Sesi Sekarang
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* PCC Distribution Gauges */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
@@ -236,12 +431,13 @@ export const PccConnectionTracker: React.FC<PccConnectionTrackerProps> = ({
                 <th className="p-3">Antarmuka Keluar</th>
                 <th className="p-3 text-right">Laju Rx / Tx</th>
                 <th className="p-3 text-center">Status</th>
+                <th className="p-3 text-center">Aksi Soket</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
               {filteredConnections.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-6 text-center text-slate-500 italic">
+                  <td colSpan={9} className="p-6 text-center text-slate-500 italic">
                     Tidak ada koneksi yang cocok dengan filter pencarian.
                   </td>
                 </tr>
@@ -318,6 +514,18 @@ export const PccConnectionTracker: React.FC<PccConnectionTrackerProps> = ({
                         <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/70 border border-emerald-800 px-2 py-0.5 rounded">
                           {conn.tcpState}
                         </span>
+                      </td>
+
+                      <td className="p-3 text-center">
+                        {onTerminateConnection && (
+                          <button
+                            onClick={() => onTerminateConnection(conn.id)}
+                            className="p-1.5 rounded bg-rose-950/40 hover:bg-rose-900/70 text-rose-300 border border-rose-800/50 transition-colors cursor-pointer"
+                            title="Putuskan sesi soket ini (Simulasi Timeout/Drop)"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

@@ -145,7 +145,7 @@ export const ChaosLabModal: React.FC<ChaosLabModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
-                Lab Pengujian & Benchmark Kinerja Failover Multi-WAN (Bab IV Skripsi)
+                Lab Pengujian & Benchmark Kinerja Failover Multi-WAN
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 Pengukuran kuantitatif waktu reaksi failover, waktu konvergensi, packet drop, dan keutuhan timestamping forensik RTC.
@@ -178,10 +178,10 @@ export const ChaosLabModal: React.FC<ChaosLabModalProps> = ({
           </div>
         )}
 
-        {/* 3 Automated Scenarios for Examiners */}
+        {/* 3 Automated Scenarios for Network Engineers */}
         <div>
           <label className="text-xs font-semibold text-slate-300 block mb-2">
-            1. Skenario Simulasi Demonstrasi Sidang Skripsi:
+            1. Skenario Simulasi & Validasi Ketahanan Jaringan (Failover Testing):
           </label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Scenario 1 */}
@@ -282,13 +282,13 @@ export const ChaosLabModal: React.FC<ChaosLabModalProps> = ({
           </div>
         </div>
 
-        {/* Quantitative Failover Benchmark Table (Thesis Chapter IV Data) */}
+        {/* Quantitative Failover Benchmark Table (NOC Failover Benchmark Records) */}
         <div className="bg-slate-950 rounded-lg border border-slate-800 p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
             <div>
               <h3 className="text-xs font-bold text-white tracking-tight flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                <span>2. Tabel Hasil Uji Benchmark Reaksi Failover Terukur (Data Kuantitatif Bab IV)</span>
+                <span>2. Tabel Hasil Uji Benchmark Reaksi Failover Terukur (Audit Metrik SLA)</span>
               </h3>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 Pengukuran parameter reaksi milidetik berdasarkan audit probe RouterOS REST API dan validasi RTC DS3231.

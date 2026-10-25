@@ -44,36 +44,36 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
 
   const slides = [
     {
-      title: '1. Judul Skripsi & Urgensi Penelitian',
-      subtitle: 'INTEGRASI API ROUTER UNTUK SISTEM MONITORING KINERJA MULTI-WAN BERBASIS WEB REAL TIME',
-      tag: 'BAB I - PENDAHULUAN',
+      title: '1. Arsitektur Multi-WAN & Latar Belakang Desain',
+      subtitle: 'SISTEM MONITORING KINERJA MULTI-WAN BERBASIS WEB REAL TIME DENGAN ROUTEROS REST API & RTC OPENWRT',
+      tag: 'MODUL 1 - ARSITEKTUR & LATAR BELAKANG DESAIN',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <div className="p-4 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
             <span className="font-bold text-white text-sm block">
-              Rumusan Masalah Utama:
+              Tantangan Operasional Infrastruktur Jaringan:
             </span>
             <ul className="list-disc list-inside space-y-1.5 text-slate-300">
               <li>
-                <strong className="text-cyan-400">Ketergantungan Single WAN:</strong> Kerentanan *Single Point of Failure* pada infrastruktur jaringan kampus/kantor yang menyebabkan terputusnya layanan akademik saat ISP utama mengalami gangguan serat optik.
+                <strong className="text-cyan-400">Kerentanan Single WAN:</strong> Risiko *Single Point of Failure* pada infrastruktur gateway yang menyebabkan gangguan total saat ISP utama putus serat optik.
               </li>
               <li>
-                <strong className="text-amber-400">Tantangan Ketiadaan Baterai CMOS MikroTik:</strong> Perangkat router MikroTik (termasuk seri CCR dan Cloud Router Switch) umumnya tidak memiliki chip Real-Time Clock dengan baterai internal, sehingga jam router rentan ter-reset ke <span className="font-mono text-rose-400">epoch 1970</span> saat mengalami cold reboot dalam kondisi internet mati total (*blackout*).
+                <strong className="text-amber-400">Tantangan Ketiadaan Baterai CMOS MikroTik:</strong> Perangkat router MikroTik (termasuk seri CCR dan Cloud Router Switch) tidak memiliki chip RTC dengan baterai internal, sehingga jam router rentan ter-reset ke <span className="font-mono text-rose-400">epoch 1970</span> saat mengalami cold reboot dalam kondisi internet blackout.
               </li>
               <li>
-                <strong className="text-emerald-400">Kebutuhan Telemetri Standar TIPHON:</strong> Perlunya sistem pemantauan berbasis web independen yang mampu mengevaluasi Quality of Service (QoS) sesuai acuan internasional ETSI TIPHON (Throughput, Delay, Jitter, Packet Loss).
+                <strong className="text-emerald-400">Kebutuhan Telemetri Standar TIPHON & SLA:</strong> Perlunya sistem pemantauan berbasis web independen yang mampu mengevaluasi Quality of Service (QoS) sesuai acuan internasional ETSI TIPHON (Throughput, Delay, Jitter, Packet Loss, Bufferbloat, dan MOS).
               </li>
             </ul>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="p-3 bg-slate-950/60 rounded border border-slate-800">
-              <span className="text-slate-400 block text-[11px]">Mahasiswa Peneliti:</span>
-              <span className="font-bold text-white">Novita Boled (NIM 202051088)</span>
+              <span className="text-slate-400 block text-[11px]">Penanggung Jawab Sistem:</span>
+              <span className="font-bold text-white">Novita Boled · Administrator NOC</span>
             </div>
             <div className="p-3 bg-slate-950/60 rounded border border-slate-800">
-              <span className="text-slate-400 block text-[11px]">Konsentrasi:</span>
-              <span className="font-bold text-white">Teknik Informatika — Jaringan Komputer</span>
+              <span className="text-slate-400 block text-[11px]">Fokus Bidang:</span>
+              <span className="font-bold text-white">Infrastruktur Jaringan Komputer & Telemetri Real-Time</span>
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
     {
       title: '2. Topologi Jaringan & Arsitektur Cross-Layer',
       subtitle: 'Integrasi Sub-Layer Linksys OpenWrt (DS3231) di Bawah MikroTik CCR2004 Gateway',
-      tag: 'BAB III - PERANCANGAN SISTEM',
+      tag: 'MODUL 2 - TOPOLOGI & SINKRONISASI CROSS-LAYER',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <div className="p-3.5 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
@@ -133,7 +133,7 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
     {
       title: '3. Konfigurasi PCC (Per Connection Classifier)',
       subtitle: 'Pembagian Beban Simetris & Hashing Soket Jaringan MikroTik RouterOS v7',
-      tag: 'BAB III & IV - METODOLOGI & IMPLEMENTASI',
+      tag: 'MODUL 3 - METODOLOGI PCC & HASHING ROUTING',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <div className="p-3.5 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
@@ -160,7 +160,7 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
     {
       title: '4. Hasil Evaluasi Metrik Kinerja Standar TIPHON',
       subtitle: 'Pengujian Mutu Layanan (QoS) Berdasarkan Standar Internasional ETSI TIPHON',
-      tag: 'BAB IV - HASIL & PEMBAHASAN',
+      tag: 'MODUL 4 - STANDAR MUTU ETSI TIPHON & BUFFERBLOAT',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <table className="w-full text-left text-xs border border-slate-800 font-mono">
@@ -217,7 +217,7 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
     {
       title: '5. Pengujian Kuantitatif Benchmark Reaksi Failover',
       subtitle: 'Analisis Waktu Deteksi, Konvergensi Rute, & Paket Drop Saat Simulasi Pemutusan Serat Optik',
-      tag: 'BAB IV - DATA EKSPERIMEN',
+      tag: 'MODUL 5 - BENCHMARK FAILOVER & HIGH AVAILABILITY',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <div className="p-3.5 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
@@ -250,7 +250,7 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
     {
       title: '6. Peran Kritis Hardware RTC DS3231 Linksys OpenWrt',
       subtitle: 'Solusi Terhadap Masalah Ketiadaan Baterai CMOS MikroTik Saat Internet Blackout',
-      tag: 'BAB IV - KONTRIBUSI PENELITIAN',
+      tag: 'MODUL 6 - SUBSISTEM HARDWARE RTC DS3231 & AUDIT FORENSIK',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <div className="p-3.5 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
@@ -285,13 +285,13 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
       )
     },
     {
-      title: '7. Kesimpulan & Saran Akademik',
-      subtitle: 'Rekapitulasi Capaian Tujuan Skripsi & Rekomendasi Pengembangan Lebih Lanjut',
-      tag: 'BAB V - KESIMPULAN & SARAN',
+      title: '7. Kesimpulan & Rekomendasi Infrastruktur',
+      subtitle: 'Rekapitulasi Capaian Sistem Pemantauan & Roadmap Pengembangan Jaringan NOC',
+      tag: 'MODUL 7 - KESIMPULAN & REKOMENDASI INFRASTRUKTUR',
       content: (
         <div className="space-y-4 text-xs leading-relaxed">
           <div className="p-4 bg-slate-950/80 rounded-lg border border-slate-800 space-y-3">
-            <span className="font-bold text-white text-sm block">Kesimpulan Penelitian:</span>
+            <span className="font-bold text-white text-sm block">Kesimpulan Implementasi Sistem:</span>
             <ol className="list-decimal list-inside space-y-1.5 text-slate-300">
               <li>
                 Sistem monitoring berbasis REST API RouterOS v7 berhasil memantau antarmuka multi-WAN secara real-time dengan interval polling 1000ms tanpa membebani utilisasi CPU router (&lt; 25%).
@@ -309,7 +309,7 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
           </div>
 
           <div className="p-3 bg-slate-950/60 rounded border border-slate-800 text-slate-400 text-[11px]">
-            <strong className="text-white">Saran Pengembangan:</strong> Integrasi Machine Learning untuk peramalan lonjakan trafik adaptif (*traffic forecasting*) dan integrasi protokol SD-WAN terdistribusi.
+            <strong className="text-white">Rekomendasi Skalabilitas NOC:</strong> Integrasi Machine Learning untuk peramalan lonjakan trafik adaptif (*traffic forecasting*) dan integrasi protokol SD-WAN terdistribusi.
           </div>
         </div>
       )
@@ -340,14 +340,14 @@ export const DefensePresentationModal: React.FC<DefensePresentationModalProps> =
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-white tracking-tight">
-                  Mode Presentasi Sidang Skripsi (Slide Pembahasan)
+                  Mode Presentasi Arsitektur & Operasional NOC
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
                   Slide {currentSlide + 1} dari {slides.length}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Panduan terstruktur untuk mempresentasikan karya ilmiah di hadapan dosen penguji
+                Dokumen arsitektur teknis dan panduan operasional sistem monitoring Multi-WAN
               </p>
             </div>
           </div>

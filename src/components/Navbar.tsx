@@ -15,9 +15,10 @@ import {
   Terminal,
   GraduationCap,
   Lock,
-  UserCheck
+  UserCheck,
+  Sun,
+  Moon
 } from 'lucide-react';
-import { UserProfileBadge } from './UserProfileBadge';
 import { authService } from '../services/authService';
 
 export type ActiveTab = 'dashboard' | 'topology' | 'pcc' | 'terminal' | 'api' | 'tiphon' | 'linksys' | 'chaos';
@@ -105,6 +106,8 @@ const navItems: NavItem[] = [
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onSelectTab,
+  isDarkMode,
+  onToggleTheme,
   pollInterval,
   onChangePollInterval,
   onOpenChaosModal,
@@ -157,6 +160,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
+            onClick={onToggleTheme}
+            className="p-1.5 text-slate-400 hover:text-cyan-300 bg-slate-900 border border-slate-800 rounded-lg transition-colors"
+            title={isDarkMode ? 'Mode Terang' : 'Mode Gelap (NOC)'}
+            aria-label="Ganti Tema"
+          >
+            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-cyan-400" />}
+          </button>
+
+          <button
             onClick={onOpenChaosModal}
             className="p-1.5 text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded transition-colors text-xs font-semibold"
             title="Lab Simulasi Failover"
@@ -188,7 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        {/* Brand & Thesis Context Header */}
+        {/* Brand & NOC Telemetry Header */}
         <div className="p-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -209,6 +221,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <div className="flex items-center gap-1.5">
+              <button
+                onClick={onToggleTheme}
+                className="p-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40 hover:bg-slate-800 transition-colors cursor-pointer"
+                title={isDarkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap (NOC)'}
+                aria-label="Toggle Theme"
+              >
+                {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-cyan-400" />}
+              </button>
+
               <button
                 onClick={onOpenLoginModal}
                 className={`p-2 rounded-lg border transition-all duration-200 shadow-sm relative group cursor-pointer ${
@@ -311,11 +332,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           })}
         </nav>
 
-        {/* User Profile Badge & System Status in Sidebar Bottom */}
+        {/* System Status in Sidebar Bottom */}
         <div className="p-3 border-t border-slate-800 bg-slate-900/50 space-y-3 shrink-0">
-          {/* Active User Account Badge */}
-          <UserProfileBadge onOpenLoginModal={onOpenLoginModal} />
-
           {/* Polling Interval Selector */}
           <div className="flex items-center justify-between text-xs bg-slate-950 p-2 rounded-lg border border-slate-800">
             <div className="flex items-center gap-2 text-slate-400">

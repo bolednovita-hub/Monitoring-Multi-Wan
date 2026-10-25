@@ -193,7 +193,7 @@ export const LinksysRtcExplorer: React.FC<LinksysRtcExplorerProps> = ({
     txPower5g: 23,
     encryption: 'WPA2-PSK (AES)',
 
-    // Kategori 6: Monitoring & Forensik Skripsi
+    // Kategori 6: Monitoring & Forensik Jaringan
     enableSyslog: true,
     enableTimeDriftAlarm: true,
     enableRtcThermalSync: true,
@@ -623,7 +623,7 @@ export const LinksysRtcExplorer: React.FC<LinksysRtcExplorerProps> = ({
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>5. Panduan Praktikum & Wiring Skripsi</span>
+            <span>5. Panduan Praktikum & Wiring Hardware RTC</span>
           </button>
 
           <button
@@ -1442,7 +1442,7 @@ export const LinksysRtcExplorer: React.FC<LinksysRtcExplorerProps> = ({
                 <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
                   <span className="text-slate-500 block text-[10px]">Divergensi Waktu & Skor Forensik:</span>
                   <span className="text-emerald-400 font-bold">{crossLayerSync?.driftMs || 0} ms · Skor: {crossLayerSync?.forensicIntegrityScore || 100}%</span>
-                  <span className="text-[9px] text-emerald-400 block mt-0.5">Jaminan Timestamp Skripsi Valid</span>
+                  <span className="text-[9px] text-emerald-400 block mt-0.5">Jaminan Timestamp Audit Valid</span>
                 </div>
               </div>
             </div>
@@ -1736,7 +1736,7 @@ export const LinksysRtcExplorer: React.FC<LinksysRtcExplorerProps> = ({
             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-white tracking-tight mb-1">
-                  Eksperimen Bukti Empiris Skripsi: Mengapa Router Membutuhkan Hardware RTC?
+                  Eksperimen Bukti Empiris: Mengapa Router Membutuhkan Hardware RTC?
                 </h3>
                 <span className="text-xs text-slate-400 font-mono">Target: {activeLinksys.name}</span>
               </div>
@@ -1848,7 +1848,7 @@ export const LinksysRtcExplorer: React.FC<LinksysRtcExplorerProps> = ({
                 <span>Panduan Lengkap Implementasi Hardware RTC pada Router Linksys OpenWrt</span>
               </h3>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Langkah-langkah teknis pengkabelan I2C (wiring), instalasi paket driver kernel, dan konfigurasi otomatisasi startup untuk kebutuhan penulisan bab perancangan dan implementasi skripsi.
+                Langkah-langkah teknis pengkabelan I2C (wiring), instalasi paket driver kernel, dan konfigurasi otomatisasi startup untuk kebutuhan perancangan dan implementasi infrastruktur jaringan NOC.
               </p>
             </div>
 
@@ -2633,7 +2633,7 @@ exit 0`}
                         className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:border-cyan-400 focus:outline-none text-xs"
                       >
                         <option value={15}>Tiap 15 Menit (Presisi Maksimal)</option>
-                        <option value={30}>Tiap 30 Menit (Direkomendasikan Skripsi)</option>
+                        <option value={30}>Tiap 30 Menit (Direkomendasikan Standar Audit)</option>
                         <option value={60}>Tiap 60 Menit (Hemat Baterai)</option>
                       </select>
                     </div>
@@ -2765,13 +2765,13 @@ exit 0`}
                 </div>
               )}
 
-              {/* KATEGORI 6: MONITORING & FORENSIK SKRIPSI */}
+              {/* KATEGORI 6: MONITORING & FORENSIK JARINGAN */}
               {modalCategory === 'monitoring' && (
                 <div className="space-y-4 animate-in fade-in duration-150">
                   <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/80 flex items-start gap-2.5 text-slate-400 text-xs">
                     <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                     <span>
-                      Integrasi pengawasan telemetri khusus riset skripsi: forward syslog terpusat, deteksi anomali drift waktu, dan sinkronisasi failover mwan3.
+                      Integrasi pengawasan telemetri audit jaringan: forward syslog terpusat, deteksi anomali drift waktu, dan sinkronisasi failover mwan3.
                     </span>
                   </div>
 

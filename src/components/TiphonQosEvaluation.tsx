@@ -34,7 +34,7 @@ export const TiphonQosEvaluation: React.FC<TiphonQosEvaluationProps> = ({
   const handleCsvDownload = () => {
     if (onExportCsv) {
       onExportCsv();
-      setDownloadSuccess('Dataset CSV berhasil diunduh untuk lampiran skripsi.');
+      setDownloadSuccess('Dataset CSV berhasil diekspor untuk analisis audit telemetri.');
       setTimeout(() => setDownloadSuccess(null), 3000);
     }
   };
@@ -189,7 +189,7 @@ export const TiphonQosEvaluation: React.FC<TiphonQosEvaluationProps> = ({
               <span>Log Telemetri Real-Time TIPHON (10 Sampel Terakhir)</span>
             </h3>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Data pencatatan per detik yang terekam secara berkesinambungan untuk keperluan analisis statistik skripsi.
+              Data pencatatan per detik yang terekam secara berkesinambungan untuk keperluan analisis statistik telemetri SLA.
             </p>
           </div>
 
@@ -298,7 +298,7 @@ export const TiphonQosEvaluation: React.FC<TiphonQosEvaluationProps> = ({
         <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-800 text-xs font-semibold text-slate-200">
             <Info className="w-4 h-4 text-cyan-400" />
-            <span>Rumus Matematis Perhitungan QoS Skripsi</span>
+            <span>Rumus Matematis Evaluasi Kualitas Layanan (TIPHON)</span>
           </div>
 
           <div className="mt-3 space-y-2.5 text-xs text-slate-300 font-mono">

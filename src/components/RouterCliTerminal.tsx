@@ -18,6 +18,7 @@ import { authService } from '../services/authService';
 interface RouterCliTerminalProps {
   onExecuteCommand: (cmd: string) => string;
   netwatchTargets: NetwatchTarget[];
+  onPingTarget?: (targetId: string) => string;
 }
 
 const QUICK_COMMANDS = [
@@ -34,7 +35,8 @@ const QUICK_COMMANDS = [
 
 export const RouterCliTerminal: React.FC<RouterCliTerminalProps> = ({
   onExecuteCommand,
-  netwatchTargets
+  netwatchTargets,
+  onPingTarget
 }) => {
   const [inputVal, setInputVal] = useState('');
   const [history, setHistory] = useState<TerminalHistoryItem[]>([
@@ -62,6 +64,25 @@ export const RouterCliTerminal: React.FC<RouterCliTerminalProps> = ({
   }, [history]);
 
   const currentUser = authService.getCurrentUser();
+
+  const handleRunPingTarget = (nw: NetwatchTarget) => {
+    const cmd = `/tool ping ${nw.host} count=4`;
+    let output = '';
+    if (onPingTarget) {
+      output = onPingTarget(nw.id);
+    } else {
+      output = onExecuteCommand(cmd);
+    }
+
+    const newItem: TerminalHistoryItem = {
+      id: `ping-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString('id-ID'),
+      command: cmd,
+      output: output,
+      type: 'output'
+    };
+    setHistory(prev => [...prev, newItem]);
+  };
 
   const handleSubmit = (cmdToRun?: string) => {
     const command = cmdToRun !== undefined ? cmdToRun : inputVal;
@@ -139,31 +160,41 @@ export const RouterCliTerminal: React.FC<RouterCliTerminalProps> = ({
             return (
               <div
                 key={nw.id}
-                className={`p-3 rounded-lg border text-xs font-mono space-y-1.5 ${
+                className={`p-3 rounded-lg border text-xs font-mono space-y-2 flex flex-col justify-between ${
                   isUp ? 'bg-slate-950/80 border-slate-800' : 'bg-rose-950/30 border-rose-900/60'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-white">{nw.targetName.split(' ')[0]} ({nw.host})</span>
-                  <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
-                    isUp ? 'text-emerald-400 bg-emerald-950 border border-emerald-800' : 'text-rose-400 bg-rose-950 border border-rose-800'
-                  }`}>
-                    {nw.status}
-                  </span>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-white">{nw.targetName.split(' ')[0]} ({nw.host})</span>
+                    <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
+                      isUp ? 'text-emerald-400 bg-emerald-950 border border-emerald-800' : 'text-rose-400 bg-rose-950 border border-rose-800'
+                    }`}>
+                      {nw.status}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 flex justify-between">
+                    <span>Antarmuka:</span>
+                    <span className="text-slate-200">{nw.wanName.split(' - ')[0]}</span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 flex justify-between">
+                    <span>Latensi RTT:</span>
+                    <span className={isUp ? 'text-cyan-400 font-bold' : 'text-rose-400'}>
+                      {isUp ? `${nw.lastRttMs} ms` : 'RTO (Timeout)'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 truncate pt-1 border-t border-slate-800/80 font-sans">
+                    Action on-down: <code className="text-amber-400 font-mono text-[9px]">{nw.downScript}</code>
+                  </div>
                 </div>
-                <div className="text-[11px] text-slate-400 flex justify-between">
-                  <span>Antarmuka:</span>
-                  <span className="text-slate-200">{nw.wanName.split(' - ')[0]}</span>
-                </div>
-                <div className="text-[11px] text-slate-400 flex justify-between">
-                  <span>Latensi RTT:</span>
-                  <span className={isUp ? 'text-cyan-400 font-bold' : 'text-rose-400'}>
-                    {isUp ? `${nw.lastRttMs} ms` : 'RTO (Timeout)'}
-                  </span>
-                </div>
-                <div className="text-[10px] text-slate-500 truncate pt-1 border-t border-slate-800/80 font-sans">
-                  Action on-down: <code className="text-amber-400 font-mono text-[9px]">{nw.downScript}</code>
-                </div>
+
+                <button
+                  onClick={() => handleRunPingTarget(nw)}
+                  className="w-full mt-2 py-1 px-2 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-cyan-300 hover:text-cyan-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Play className="w-2.5 h-2.5 text-cyan-400" />
+                  <span>Uji Ping Sekarang</span>
+                </button>
               </div>
             );
           })}
@@ -209,7 +240,7 @@ export const RouterCliTerminal: React.FC<RouterCliTerminalProps> = ({
         {/* Quick Commands Chip Ribbon */}
         <div className="p-3 bg-slate-900/40 border-b border-slate-800 flex flex-wrap gap-1.5 items-center">
           <span className="text-[10px] text-slate-400 uppercase font-sans font-bold tracking-wider mr-1">
-            Eksekusi Cepat Skripsi:
+            Eksekusi Cepat Perintah NOC:
           </span>
           {QUICK_COMMANDS.map((qc, i) => (
             <button

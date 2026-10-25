@@ -161,12 +161,12 @@ export interface RouterApiConfig {
   lastSyncTimestamp: number;
 }
 
-export interface ThesisMetadata {
-  studentName: string;
-  studentId: string;
-  thesisTitle: string;
+export interface AuditNocMetadata {
+  operatorName: string;
+  operatorId: string;
+  projectTitle: string;
   department: string;
-  advisor: string;
+  supervisor: string;
   institution: string;
   testDate: string;
   notes: string;
@@ -377,6 +377,24 @@ export interface RtcRegisterMap {
   binaryValue: string;
   decodedValue: string;
   description: string;
+}
+
+export type LinksysTopologyMode = 'downstream_sublayer' | 'parallel_vrrp' | 'edge_offload';
+
+export interface TopologyArchitectureConfig {
+  mode: LinksysTopologyMode;
+  title: string;
+  badge: string;
+  sublabel: string;
+  vrrpVirtualIp?: string;
+  vrrpVirtualMac?: string;
+  mikrotikRole: string;
+  linksysRole: string;
+  wanDistribution: string;
+  timeSyncPath: string;
+  pros: string[];
+  cons: string[];
+  industryStandard: string;
 }
 
 
