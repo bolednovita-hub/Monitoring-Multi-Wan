@@ -13,7 +13,6 @@ import {
   Clock,
   ChevronRight,
   Terminal,
-  GraduationCap,
   Lock,
   UserCheck,
   Sun,
@@ -356,19 +355,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Action Buttons */}
           <div className="space-y-1.5">
-            {onOpenDefenseModal && (
-              <button
-                onClick={() => {
-                  onOpenDefenseModal();
-                  setIsMobileOpen(false);
-                }}
-                className="w-full py-2 px-3 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md border border-cyan-400/30"
-              >
-                <GraduationCap className="w-4 h-4 text-cyan-200" />
-                <span>Mode Presentasi Arsitektur NOC</span>
-              </button>
-            )}
-
             <button
               onClick={() => {
                 onOpenChaosModal();

@@ -23,7 +23,7 @@ import { AccessDeniedModal } from './components/AccessDeniedModal';
 import { networkEngine } from './services/networkEngine';
 import { authService } from './services/authService';
 import { WanId } from './types/network';
-import { FlaskConical, CheckCircle2, AlertTriangle, ShieldCheck, GraduationCap, Bell, Terminal, Lock, User } from 'lucide-react';
+import { FlaskConical, CheckCircle2, AlertTriangle, ShieldCheck, Bell, Terminal, Lock, User } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
@@ -206,13 +206,6 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <button
-              onClick={() => setShowDefenseModal(true)}
-              className="px-3.5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-2 shadow-sm border border-cyan-400/40"
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-cyan-200" />
-              <span>Presentasi Arsitektur NOC</span>
-            </button>
             <button
               onClick={() => setShowChaosModal(true)}
               className="px-3.5 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm"
